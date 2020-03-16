@@ -1,23 +1,43 @@
 package com.example.fragmentapp;
 
 //import java.util.Date;
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+@Entity(tableName = "task_table")
 public class Task implements Serializable {
-    private String titleTugs, detailTugas, levelTugas;
-    private Timestamp deadLineTugas;
+    @PrimaryKey(autoGenerate = true)
+    @NonNull
+    public int index;
+    @NonNull
+    @ColumnInfo(name = "title")
+    private String titleTugas;
+    @NonNull
+    @ColumnInfo(name = "detail")
+    private String detailTugas;
+    @NonNull
+    @ColumnInfo(name = "level")
+    private String levelTugas;
+    @NonNull
+    @ColumnInfo(name = "deadline")
+    private String deadLineTugas;
 
-    public Task(String title, String detail, String level, Timestamp deadline){
-        this.titleTugs = title;
+    public Task(String title, String detail, String level, String deadline){
+        this.titleTugas = title;
         this.detailTugas = detail;
         this.levelTugas = level;
         this.deadLineTugas = deadline;
     }
+
     public Task() {}
 
     public String getTitleTugas() {
-        return titleTugs;
+        return titleTugas;
     }
 
     public String getDetailTugas() {
@@ -28,19 +48,19 @@ public class Task implements Serializable {
         return levelTugas;
     }
 
-    public Timestamp getDeadLineTugas() {
+    public String getDeadLineTugas() {
         return deadLineTugas;
     }
 
-    public void setTitleTugs(String titleTugs) {
-        this.titleTugs = titleTugs;
+    public void setTitleTugas(String titleTugs) {
+        this.titleTugas = titleTugs;
     }
 
     public void setDetailTugas(String detailTugas) {
         this.detailTugas = detailTugas;
     }
 
-    public void setDeadLineTugas(Timestamp deadLineTugas) {
+    public void setDeadLineTugas(String deadLineTugas) {
         this.deadLineTugas = deadLineTugas;
     }
 

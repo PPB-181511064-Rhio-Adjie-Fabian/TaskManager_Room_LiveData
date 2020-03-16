@@ -7,9 +7,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -18,65 +23,63 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ArrayList<Task> taskList = new ArrayList<>();
-    private RecyclerView recyclerView;
-    private TaskAdapter taskAdapter;
+    private TaskViewModel mTaskModel;
+    public static final int NEW_WORD_ACTIVITY_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        recyclerView.setHasFixedSize(true);
-        taskList = init();
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-        taskAdapter = new TaskAdapter(taskList, this);
-        recyclerView.setAdapter(taskAdapter);
-    }
 
-    private ArrayList<Task> init(){
-        ArrayList<Task> list = new ArrayList<>();
-        DBAdapter db = new DBAdapter(this);
-        db.open();
-        Cursor c = db.getAllTask();
-        if(c.moveToFirst()){
-            do{
-                String title = c.getString(1);
-                String detail = c.getString(2);
-                String level = c.getString(3);
-                String deadline = c.getString(4);
-                list.add(new Task(title, detail, level, Timestamp.valueOf(deadline)));
-            } while (c.moveToNext());
-        }
-        db.close();
-        return list;
-    }
+        RecyclerView recyclerView = findViewById(R.id.recyclerview);
+        final TaskListAdapter adapter = new TaskListAdapter(this);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-    public void onClick(View view){
-        Intent i = new Intent("com.example.fragmentapp.SecondaryActivity");
-        startActivityForResult(i, 1);
-    }
+        mTaskModel = new ViewModelProvider(this).get(TaskViewModel.class);
 
-    public void addTaskToDB(Task task){
-        DBAdapter db = new DBAdapter(this);
-        db.open();
-        long id = db.insertTask(task.getTitleTugas(), task.getDetailTugas(), task.getLevelTugas(), task.getDeadLineTugas());
-        db.close();
-    }
-
-    @SuppressLint("MissingSuperCall")
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data){
-        if(requestCode == 1){
-            if(resultCode == RESULT_OK){
-                Task newTask = (Task) data.getSerializableExtra("newTask");
-                addTaskToDB(newTask);
-                taskList.add(newTask);
-                taskAdapter = new TaskAdapter(taskList, this);
-                recyclerView.setAdapter(taskAdapter);
+        mTaskModel.getAllTask().observe(this, new Observer<List<Task>>() {
+            @Override
+            public void onChanged(@Nullable final List<Task> words) {
+                // Update the cached copy of the words in the adapter.
+                adapter.setTask(words);
             }
+        });
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, NewTaskActivity.class);
+                startActivityForResult(intent, NEW_WORD_ACTIVITY_REQUEST_CODE);
+            }
+        });
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == NEW_WORD_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+            Task task = (Task) data.getSerializableExtra("newTask");
+            mTaskModel.insert(task);
+        } else {
+            Toast.makeText(
+                    getApplicationContext(),
+                    R.string.empty_not_saved,
+                    Toast.LENGTH_LONG).show();
         }
     }
+
+//    public void onClick(View view){
+//        Intent i = new Intent("com.example.fragmentapp.SecondaryActivity");
+//        startActivityForResult(i, 1);
+//    }
+//
+//    public void addTaskToDB(Task task){
+//        DBAdapter db = new DBAdapter(this);
+//        db.open();
+//        long id = db.insertTask(task.getTitleTugas(), task.getDetailTugas(), task.getLevelTugas(), task.getDeadLineTugas());
+//        db.close();
+//    }
 
 }

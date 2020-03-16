@@ -6,4 +6,5 @@
     <color name="rating">#20e3cf</color>
     <color name="year">#20e3cf</color>
     <color name="title">#222222</color>
+    <color name="buttonLabel">#d3d3d3</color>
 </resources>

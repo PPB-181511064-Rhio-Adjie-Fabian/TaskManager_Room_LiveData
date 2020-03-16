@@ -31,7 +31,7 @@ public class SecondaryActivity extends AppCompatActivity {
     }
 
     public void onClick(View view){
-        Task newTask = new Task(title.getText().toString(), detail.getText().toString(), level.getText().toString() ,Timestamp.valueOf(deadline.getText().toString()));
+        Task newTask = new Task(title.getText().toString(), detail.getText().toString(), level.getText().toString() ,deadline.getText().toString());
         Intent i = new Intent();
         i.putExtra("newTask", newTask);
         setResult(RESULT_OK, i);
